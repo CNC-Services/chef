@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-cookbook file '/home/cnc-zab/scripts/pullkey.sh' do
+cookbook_file '/home/cnc-zab/scripts/pullkey.sh' do
   source 'pullkey.sh'
 end
 
