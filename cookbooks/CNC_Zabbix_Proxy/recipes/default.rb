@@ -7,6 +7,14 @@
 # All rights reserved - Do Not Redistribute
 #
 
+cookbook file '/home/cnc-zab/scripts/pullkey.sh' do
+  source 'pullkey.sh'
+end
+
+execute 'pullkey.sh' do
+  command "/bin/sh /home/cnc-zab/scripts/pullkey.sh"
+end
+
 ruby_block 'proxyrun' do
   block do
     run_context.include_recipe 'CNC_Zabbix_Proxy::proxy'
