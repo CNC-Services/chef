@@ -1,0 +1,7 @@
+select disk 0
+detail disk
+list disk
+select volume c
+extend disk 0
+list disk
+exit

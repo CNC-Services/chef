@@ -1,0 +1,39 @@
+#
+# Cookbook:: cnc_zabbix_device-backup
+# Recipe:: default
+#
+# Copyright:: 2017, The Authors, All Rights Reserved.
+
+##Device Backup
+# Crutcho
+case node['hostname']
+when 'Crutcho'
+  cookbook_file "/home/cnc-zab/scripts/crutcho_list.txt" do
+    source "crutcho_list.txt"
+  end
+  cookbook_file "/home/cnc-zab/scripts/crutcho_collect.py" do
+    source "crutcho_collect.py"
+  end
+  cookbook_file "/home/cnc-zab/scripts/crutcho_list2.txt" do
+    source "crutcho_list2.txt"
+  end
+  cookbook_file "/home/cnc-zab/scripts/crutcho_collect2.py" do
+    source "crutcho_collect2.py"
+  end
+  cookbook_file "/home/cnc-zab/scripts/crutcho_collect.sh" do
+    source "crutcho_collect.sh"
+  end
+  cookbook_file "/home/cnc-zab/scripts/crutcho_copy.sh" do
+    source "crutcho_copy.sh"
+  end
+  execute 'collect' do
+    command "sh /home/cnc-zab/scripts/crutcho_collect.sh"
+  end
+  execute 'copy' do
+    command "sh /home/cnc-zab/scripts/crutcho_copy.sh"
+  end
+else
+ execute 'echocrutcho' do
+   command "echo hostname does not match"
+ end
+end

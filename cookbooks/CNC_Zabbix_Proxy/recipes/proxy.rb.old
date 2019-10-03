@@ -1,0 +1,111 @@
+#
+# Cookbook Name:: CNC_Zabbix_Proxy
+# Recipe:: default
+#
+# Copyright 2017, YOUR_COMPANY_NAME
+#
+# All rights reserved - Do Not Redistribute
+#
+
+##Create Directories
+directory '/home/cnc-zab/proxy' do
+  action :create
+end
+
+### Proxy Setup ###
+# 0 Configure environment
+cookbook_file "/home/cnc-zab/proxy/0.sh" do
+  source "proxy-files/0.sh"
+end
+execute 'conf env' do
+  command "sh /home/cnc-zab/proxy/0.sh"
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+
+### Proxy Setup ###
+# 1 Delete old zabbix files on proxy
+  file "/home/pi/cron.sh" do
+  action :delete
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+file "/home/cnc-admin/cron.sh" do
+  action :delete
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+file "/usr/local/etc/zabbix_proxy.conf" do
+  action :delete
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+file "/etc/init.d/zabbix-proxy" do
+  action :delete
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+directory "/home/cnc-zab/proxy/zabbix" do
+  recursive true
+  action :delete
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+
+### Proxy Setup ###
+# 2 Mysql database setup
+cookbook_file "/home/cnc-zab/proxy/1.sh" do
+  source "proxy-files/1.sh"
+end
+execute 'mysql' do
+  command "sh /home/cnc-zab/proxy/1.sh"
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+
+### Proxy Setup ###
+# 3 Install Git and sync GitHub
+#execute 'git' do
+#  command "apt-get install git"
+#  command "cd /home/cnc-zab/proxy && git clone https://github.com/hydruid/zabbix.git"
+#  command "cd /home/cnc-zab/proxy/zabbix && git pull"
+#end
+
+### Proxy Setup ###
+# 4 Proxy install script
+cookbook_file "/home/cnc-zab/proxy/proxy.sh" do
+  source "proxy-files/proxy.sh"
+end
+execute 'proxy' do
+  command "/bin/sh /home/cnc-zab/proxy/proxy.sh"
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+
+### Proxy Setup ###
+# 5 Copy config files 
+cookbook_file "/usr/local/etc/zabbix_proxy.conf" do
+  source "proxy-files/zabbix_proxy.conf"
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+cookbook_file "/etc/snmp/snmpd.conf" do
+  source "proxy-files/snmpd.conf"
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+
+### Proxy Setup ###
+# 6 Cleanup
+cookbook_file "/home/cnc-zab/proxy/2.sh" do
+  source "proxy-files/2.sh"
+end
+execute 'cleanup' do
+  command "sh /home/cnc-zab/proxy/2.sh"
+  only_if {File.exists?("/home/cnc-zab/proxy.txt")}
+end
+
+### Proxy Setup ###
+# 7 Delete cookbook action file 
+file "/home/cnc-zab/proxy.txt" do
+  action :delete
+end
+
+### Proxy Setup ###
+# 8 Restart services
+#service "zabbix-proxy" do
+#  action :restart
+#end
+service "snmpd" do
+  action :restart
+end

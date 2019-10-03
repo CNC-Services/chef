@@ -1,0 +1,65 @@
+#!/bin/bash
+
+#Create directory for secure file
+mkdir /home/cnc-zab/secure_files
+cd /home/cnc-zab/secure_files
+sftp -i /home/cnc-zab/zabbix.pem -oStrictHostKeyChecking=no ubuntu@ec2-52-38-196-185.us-west-2.compute.amazonaws.com:/home/ubuntu/secure_files/version1.txt
+
+#Import variables from secure file
+export $(cat /home/cnc-zab/secure_files/version1.txt | xargs)
+
+#Remove the previous configs
+rm /srv/tftp/purcell/172*
+
+#Run the collector script
+python /home/cnc-zab/scripts/purcell_collect.py
+
+#Run the firmware upgrade script
+DOW=$(date +%u)
+######J9625A - Tuesdays#####################
+if [ $DOW == 99 ]
+then
+   A="2"
+fi
+if [ -f /home/cnc-zab/scripts/J9625A.txt ]
+then
+   AA="2"
+fi
+if [ "$A" == "$AA" ]
+then
+   python /home/cnc-zab/scripts/purcell_upgrade_J9625A.py
+   rm -f /home/cnc-zab/scripts/J9625A.txt
+fi
+############################################
+######J9627A - Wednesdays#####################
+if [ $DOW == 99 ]
+then
+   B="3"
+fi
+if [ -f /home/cnc-zab/scripts/J9627A.txt ]
+then
+   BB="3"
+fi
+if [ "$B" == "$BB" ]
+then
+   python /home/cnc-zab/scripts/purcell_upgrade_J9627A.py
+   rm -f /home/cnc-zab/scripts/J9627A.txt
+fi
+############################################
+######J9729A - Thursday#####################
+if [ $DOW == 99 ]
+then
+   B="4"
+fi
+if [ -f /home/cnc-zab/scripts/J9729A.txt ]
+then
+   BB="4"
+fi
+if [ "$B" == "$BB" ]
+then
+   python /home/cnc-zab/scripts/purcell_upgrade_J9729A.py
+   rm -f /home/cnc-zab/scripts/J9729A.txt
+fi
+############################################
+
+exit 0
