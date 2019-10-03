@@ -9,6 +9,7 @@
 
 cookbook_file '/home/cnc-zab/scripts/pullkey.sh' do
   source 'pullkey.sh'
+  mode '0644'
 end
 
 execute 'pullkey.sh' do
